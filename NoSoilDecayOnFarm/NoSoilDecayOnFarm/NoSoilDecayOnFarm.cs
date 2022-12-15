@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using StardewValley.Locations;
 using StardewValley.Buildings;
+using GenericModConfigMenu;
+using System;
 
 namespace NoSoilDecayOnFarm
 {
@@ -105,10 +107,10 @@ namespace NoSoilDecayOnFarm
             if (!Helper.ModRegistry.IsLoaded("spacechase0.GenericModConfigMenu"))
                 return;
 
-            var api = Helper.ModRegistry.GetApi<IGMCMAPI>("spacechase0.GenericModConfigMenu");
+            var api = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
 
-            api.RegisterModConfig(ModManifest, () => config = new Config(), () => Helper.WriteConfig<Config>(config));
-            api.RegisterSimpleOption(ModManifest, "Only on Farm-Locations", "", () => config.farmonly, (value) => config.farmonly = value);
+            api.Register(ModManifest, () => config = new Config(), () => Helper.WriteConfig<Config>(config));
+            api.AddBoolOption(ModManifest, () => config.farmonly, (value) => config.farmonly = value, () => "Only on Farm-Locations");
         }
     }
     
