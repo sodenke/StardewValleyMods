@@ -45,7 +45,7 @@ namespace NoSoilDecayOnFarm
                 foreach (SaveTiles st in savedata.data)
                     foreach (GameLocation l in getAllLocationsAndBuidlings().Where(lb => lb.Name == st.location))
                     {
-                        if (config.farmonly && !(l is Farm || l.IsGreenhouse || l is BuildableGameLocation))
+                        if (config.farmonly && !(l is Farm || l.IsGreenhouse || l.IsBuildableLocation()))
                             continue;
 
                         foreach (Vector2 v in st.tiles)
@@ -59,7 +59,7 @@ namespace NoSoilDecayOnFarm
                             }
 
                         foreach (SObject o in l.objects.Values.Where(obj => obj.name.Contains("Sprinkler")))
-                            o.DayUpdate(l);
+                            o.DayUpdate();
                     }
             }
         }
@@ -69,10 +69,12 @@ namespace NoSoilDecayOnFarm
             foreach (GameLocation location in Game1.locations)
             {
                 yield return location;
-                if (location is BuildableGameLocation bgl)
-                    foreach (Building building in bgl.buildings)
+                if (location.IsBuildableLocation())
+                {
+                    foreach (Building building in location.buildings)
                         if (building.indoors.Value != null)
                             yield return building.indoors.Value;
+                }
             }
         }
 
@@ -85,7 +87,7 @@ namespace NoSoilDecayOnFarm
                 {
                     if (location is GameLocation l)
                     {
-                        if (config.farmonly && !(l is Farm || l.IsGreenhouse || l is BuildableGameLocation))
+                        if (config.farmonly && !(l is Farm || l.IsGreenhouse || l.IsBuildableLocation()))
                             continue;
 
                         if (!hoeDirtChache.ContainsKey(location))
