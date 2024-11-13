@@ -6,7 +6,6 @@ using StardewModdingAPI.Events;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using StardewValley.Locations;
 using StardewValley.Buildings;
 using GenericModConfigMenu;
 using System;

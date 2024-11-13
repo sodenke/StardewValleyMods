@@ -18,7 +18,7 @@ namespace NoSoilDecayOnFarm
         {
             this.data = new List<SaveTiles>();
             foreach (KeyValuePair<GameLocation, List<Vector2>> l in data)
-                this.data.Add(new SaveTiles(l.Key.name, l.Value));
+                this.data.Add(new SaveTiles(l.Key.Name, l.Value));
         }
 
     }
