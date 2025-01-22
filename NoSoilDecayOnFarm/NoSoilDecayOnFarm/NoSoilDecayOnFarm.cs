@@ -9,6 +9,7 @@ using System.Linq;
 using StardewValley.Buildings;
 using GenericModConfigMenu;
 using System;
+using Netcode;
 
 namespace NoSoilDecayOnFarm
 {
@@ -42,25 +43,54 @@ namespace NoSoilDecayOnFarm
             if (Game1.IsMasterGame)
             {
                 foreach (SaveTiles st in savedata.data)
+                {
                     foreach (GameLocation l in getAllLocationsAndBuidlings().Where(lb => lb.Name == st.location))
                     {
                         if (config.farmonly && !(l is Farm || l.IsGreenhouse || l.IsBuildableLocation()))
                             continue;
 
                         foreach (Vector2 v in st.tiles)
+                        {
                             if (!l.terrainFeatures.ContainsKey(v) || !(l.terrainFeatures[v] is HoeDirt))
                             {
+                                bool isInSprinklerRange = IsInSprinklerRange(l, v);
+                                var newHoeDirt = (Game1.isRaining || isInSprinklerRange) ? new HoeDirt(1) : new HoeDirt(0);
+                                NetString oldFertilizer = new NetString();
+                                if (st.fertilizer != null && config.reapplyfertilzer && st.fertilizer.ContainsKey(v))
+                                {
+                                    oldFertilizer = new NetString(st.fertilizer[v]);
+                                    newHoeDirt.plant(oldFertilizer.Value, Game1.player, true);
+                                }
+
                                 l.terrainFeatures.Remove(v);
-                                l.terrainFeatures.Add(v, Game1.isRaining ? new HoeDirt(1) : new HoeDirt(0));
+                                l.terrainFeatures.Add(v, newHoeDirt);
 
                                 if (l.objects.Keys.Contains(v) && l.objects[v] is SObject o && (o.Name.Equals("Weeds") || o.Name.Equals("Stone") || o.Name.Equals("Twig")))
                                     l.objects.Remove(v);
                             }
-
-                        foreach (SObject o in l.objects.Values.Where(obj => obj.name.Contains("Sprinkler")))
-                            o.DayUpdate();
+                        }
                     }
+                }
             }
+        }
+
+        private bool IsInSprinklerRange(GameLocation l, Vector2 v)
+        {
+            var locations = new List<Vector2>();
+            foreach (SObject o in l.objects.Values.Where(obj => obj.Name.Contains("Sprinkler")))
+            { 
+                List<Vector2> list = o.GetSprinklerTiles();
+                foreach (var vector in list)
+                {
+                    locations.Add(vector);
+                }
+            }
+
+            if (locations.Contains(v))
+            {
+                return true;
+            }
+            return false;
         }
 
         private IEnumerable<GameLocation> getAllLocationsAndBuidlings()
@@ -81,7 +111,7 @@ namespace NoSoilDecayOnFarm
         {
             if (Game1.IsMasterGame)
             {
-                var hoeDirtChache = new Dictionary<GameLocation, List<Vector2>>();
+                var hoeDirtCache = new Dictionary<GameLocation, HoeDirtPlusFertilizer>();
                 foreach (GameLocation location in getAllLocationsAndBuidlings())
                 {
                     if (location is GameLocation l)
@@ -89,16 +119,24 @@ namespace NoSoilDecayOnFarm
                         if (config.farmonly && !(l is Farm || l.IsGreenhouse || l.IsBuildableLocation()))
                             continue;
 
-                        if (!hoeDirtChache.ContainsKey(location))
-                            hoeDirtChache.Add(location, new List<Vector2>());
+                        if (!hoeDirtCache.ContainsKey(location))
+                            hoeDirtCache.Add(location, new HoeDirtPlusFertilizer());
 
-                        hoeDirtChache[location] = location.terrainFeatures.Keys
-                            .Where(t => location.terrainFeatures[t] is HoeDirt)
-                            .ToList();
+                        var hd = new HoeDirtPlusFertilizer();
+                        foreach (var coords in location.terrainFeatures.Keys)
+                        {
+                            var tempTile = location.terrainFeatures[coords];
+                            if (tempTile is HoeDirt)
+                            {
+                                hd.hoedirtLocation.Add(coords);
+                                hd.hoeDirt_fertilizer.Add(coords, ((HoeDirt)tempTile).fertilizer.Value);
+                            }
+                        }
+                        hoeDirtCache[location] = hd;
                     }
                 }
 
-                savedata = new SaveData(hoeDirtChache);
+                savedata = new SaveData(hoeDirtCache);
                 Helper.Data.WriteSaveData("nsd.save", savedata);
             }
         }
@@ -112,6 +150,7 @@ namespace NoSoilDecayOnFarm
 
             api.Register(ModManifest, () => config = new Config(), () => Helper.WriteConfig<Config>(config));
             api.AddBoolOption(ModManifest, () => config.farmonly, (value) => config.farmonly = value, () => "Only on Farm-Locations");
+            api.AddBoolOption(ModManifest, () => config.reapplyfertilzer, (value) => config.farmonly = value, () => "Re-Apply Fertilizer");
         }
     }
     
