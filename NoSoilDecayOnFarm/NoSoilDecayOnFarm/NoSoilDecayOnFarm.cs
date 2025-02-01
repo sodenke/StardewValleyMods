@@ -56,7 +56,7 @@ namespace NoSoilDecayOnFarm
                                 bool isInSprinklerRange = IsInSprinklerRange(l, v);
                                 var newHoeDirt = (Game1.isRaining || isInSprinklerRange) ? new HoeDirt(1) : new HoeDirt(0);
                                 NetString oldFertilizer = new NetString();
-                                if (st.fertilizer != null && config.reapplyfertilzer && st.fertilizer.ContainsKey(v))
+                                if (st.fertilizer != null && st.fertilizer.ContainsKey(v) && st.fertilizer[v] != null && config.reapplyfertilzer)
                                 {
                                     oldFertilizer = new NetString(st.fertilizer[v]);
                                     newHoeDirt.plant(oldFertilizer.Value, Game1.player, true);

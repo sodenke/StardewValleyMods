@@ -1,0 +1,10 @@
+﻿{
+  "Name": "WaterGardenPots",
+  "Author": "A_Dude",
+  "Version": "1.0.0",
+  "Description": "Water garden pots if in range of a sprinkler",
+  "UniqueID": "A_Dude.WaterGardenPots",
+  "EntryDll": "WaterGardenPots.dll",
+  "MinimumApiVersion": "4.1.7",
+  "UpdateKeys": [ "Nexus:31332" ]
+}

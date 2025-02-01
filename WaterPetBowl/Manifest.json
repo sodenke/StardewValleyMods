@@ -1,0 +1,10 @@
+﻿{
+  "Name": "WaterPetBowl",
+  "Author": "A_Dude",
+  "Version": "1.0.0",
+  "Description": "Water pet bowls if within range of a sprinkler",
+  "UniqueID": "A_Dude.WaterPetBowl",
+  "EntryDll": "WaterPetBowl.dll",
+  "MinimumApiVersion": "4.1.7",
+  "UpdateKeys": [ "Nexus:31331" ]
+}
