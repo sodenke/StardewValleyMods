@@ -10,9 +10,7 @@ namespace WaterPetBowl
     {
         public override void Entry(IModHelper helper)
         {
-            //config = Helper.ReadConfig<Config>();
             helper.Events.GameLoop.DayStarted += (s, e) => waterPetBowls();
-            // helper.Events.GameLoop.GameLaunched += (s, e) => addConfig();
         }
 
         private void waterPetBowls()
@@ -27,14 +25,19 @@ namespace WaterPetBowl
                         {
                             if (building is PetBowl bowl)
                             {
-                                //Console.WriteLine("Found pet bowl.");
+                                var coordsOfBowl = new List<Vector2>();
                                 var locationOfBowl = Utility.PointToVector2(bowl.GetPetSpot());
-                                //Console.WriteLine("Found pet bowl at " + locationOfBowl.X + " " + locationOfBowl.Y);
-                                bool isInSprinklerRange = IsInSprinklerRange(location, Utility.PointToVector2(bowl.GetPetSpot()));
+
+                                // add all 4 tiles coords of the pet bowl building
+                                coordsOfBowl.Add(locationOfBowl);
+                                coordsOfBowl.Add(new Vector2(locationOfBowl.X, locationOfBowl.Y - 1));
+                                coordsOfBowl.Add(new Vector2(locationOfBowl.X + 1, locationOfBowl.Y));
+                                coordsOfBowl.Add(new Vector2(locationOfBowl.X + 1, locationOfBowl.Y - 1));
+ 
+                                bool isInSprinklerRange = IsInSprinklerRange(location, coordsOfBowl, false);
                                 //Console.WriteLine("Is in sprinkler range: " + isInSprinklerRange);
                                 if (isInSprinklerRange)
                                 {
-                                    //Console.WriteLine("Watered pet bowl");
                                     bowl.watered.Value = true;
                                 }
                             }
@@ -42,6 +45,33 @@ namespace WaterPetBowl
                     }
                 }
             }
+        }
+
+        private bool IsInSprinklerRange(GameLocation l, List<Vector2> coords, bool print = false)
+        {
+            var locations = new List<Vector2>();
+            foreach (SObject o in l.objects.Values.Where(obj => obj.Name.Contains("Sprinkler")))
+            {
+                List<Vector2> list = o.GetSprinklerTiles();
+                foreach (var vector in list)
+                {
+                    locations.Add(vector);
+                    if (print)
+                    {
+                        Console.WriteLine(vector.X + " " + vector.Y);
+                    }
+
+                }
+            }
+
+            foreach (var coord in coords)
+            {
+                if (locations.Contains(coord))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private bool IsInSprinklerRange(GameLocation l, Vector2 v, bool print = false)
