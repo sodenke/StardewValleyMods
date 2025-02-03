@@ -1,7 +1,7 @@
 ﻿{
   "Name": "NoSoilDecayOnFarm",
   "Author": "A_Dude",
-  "Version": "1.0.8",
+  "Version": "1.0.9",
   "Description": "Prevents 'hoe dirt' from reverting to normal ground on the farm",
   "UniqueID": "A_Dude.NoSoilDecayOnFarm",
   "EntryDll": "NoSoilDecayOnFarm.dll",

@@ -129,7 +129,10 @@ namespace NoSoilDecayOnFarm
                             if (tempTile is HoeDirt)
                             {
                                 hd.hoedirtLocation.Add(coords);
-                                hd.hoeDirt_fertilizer.Add(coords, ((HoeDirt)tempTile).fertilizer.Value);
+                                if(((HoeDirt)tempTile).fertilizer.Value != null)
+                                {
+                                    hd.hoeDirt_fertilizer.Add(coords, ((HoeDirt)tempTile).fertilizer.Value);
+                                }
                             }
                         }
                         hoeDirtCache[location] = hd;
