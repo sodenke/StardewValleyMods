@@ -9,11 +9,12 @@ namespace WaterGardenPots
 {
     public class WaterGardenPots : Mod
     {
+        private static Config config;
+
         public override void Entry(IModHelper helper)
         {
-            //config = Helper.ReadConfig<Config>();
+            config = Helper.ReadConfig<Config>();
             helper.Events.GameLoop.DayStarted += (s, e) => waterGardenPots();
-           // helper.Events.GameLoop.GameLaunched += (s, e) => addConfig();
         }
 
         private void waterGardenPots()
@@ -40,6 +41,7 @@ namespace WaterGardenPots
                             }
                         }
 
+                        // should remove this but leaving for now - covered by another mod
                         foreach (Building building in location.buildings)
                         {
                             if (building is PetBowl bowl)
@@ -66,7 +68,7 @@ namespace WaterGardenPots
             var locations = new List<Vector2>();
             foreach (SObject o in l.objects.Values.Where(obj => obj.Name.Contains("Sprinkler")))
             {
-                List<Vector2> list = o.GetSprinklerTiles();
+                List<Vector2> list = GetSprinklerTiles(o);
                 foreach (var vector in list)
                 {
                     locations.Add(vector);
@@ -74,7 +76,6 @@ namespace WaterGardenPots
                     {
                         Console.WriteLine(vector.X + " " + vector.Y);
                     }
-
                 }
             }
 
@@ -83,6 +84,31 @@ namespace WaterGardenPots
                 return true;
             }
             return false;
+        }
+
+        public List<Vector2> GetSprinklerTiles(SObject o)
+        {
+            int modifiedRadiusForSprinkler = o.GetModifiedRadiusForSprinkler() + config.AddRange;
+            if (modifiedRadiusForSprinkler == 0)
+            {
+                return Utility.getAdjacentTileLocations(o.TileLocation);
+            }
+
+            if (modifiedRadiusForSprinkler > 0)
+            {
+                List<Vector2> list = new List<Vector2>();
+                for (int i = (int)o.TileLocation.X - modifiedRadiusForSprinkler; (float)i <= o.TileLocation.X + (float)modifiedRadiusForSprinkler; i++)
+                {
+                    for (int j = (int)o.TileLocation.Y - modifiedRadiusForSprinkler; (float)j <= o.TileLocation.Y + (float)modifiedRadiusForSprinkler; j++)
+                    {
+                        list.Add(new Vector2(i, j));
+                    }
+                }
+
+                return list;
+            }
+
+            return new List<Vector2>();
         }
 
         private IEnumerable<GameLocation> getAllLocationsAndBuidlings()
